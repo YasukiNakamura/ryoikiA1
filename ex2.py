@@ -59,6 +59,20 @@ for point in keypoints.data[0][5:]:
         -1
     )
 
+point1 = keypoints.data[0][5] 
+x1,y1,conf1 = point1
+point2 =  keypoints.data[0][6]
+x2,y2,conf2 = point2
+point3 = keypoints.data[0][11] 
+x3,y3,conf3 = point3
+point4 =  keypoints.data[0][12]
+x4,y4,conf1 = point4
+
+avex = (x1+x2+x3+x4)/4
+avey = (y1+y2+y3+y4)/4
+
+cv2.circle(img,(int(avex),int(avey)),3,(0,0,255),-1)
+
 cv2.imshow("", img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
