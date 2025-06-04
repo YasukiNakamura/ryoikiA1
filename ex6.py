@@ -32,12 +32,9 @@ for i, box in enumerate(boxes):
 
     # 色ごとのマスク作成
     yellow_mask = cv2.inRange(hsv, (20, 80, 50), (40, 255, 255))
-    blue_mask = cv2.inRange(hsv, (100, 100, 20), (150, 255, 150))
-    red_mask1 = cv2.inRange(hsv, (0, 100, 40), (10, 255, 255))
-    red_mask2 = cv2.inRange(hsv, (160, 100, 40), (180, 255, 255))
-    red_mask = cv2.bitwise_or(red_mask1, red_mask2)
-    green_mask = cv2.inRange(hsv, (40, 40, 40), (80, 255, 255))
-    green_ratio = cv2.countNonZero(green_mask) / area
+    blue_mask = cv2.inRange(hsv, (120, 40, 60), (255, 255, 255))
+    red_mask = cv2.inRange(hsv, (100, 40, 230), (255, 255, 255))
+
     # 色の割合
     area = roi.shape[0] * roi.shape[1]
     yellow_ratio = cv2.countNonZero(yellow_mask) / area
@@ -45,9 +42,7 @@ for i, box in enumerate(boxes):
     red_ratio = cv2.countNonZero(red_mask) / area
 
     # 判定と描画
-    if green_ratio > 0.15:
-        continue
-    if yellow_ratio > 0.2:
+    if yellow_ratio > 0.25:
         color = (0, 255, 255)  # 黄色チーム（ドルトムント）
     elif blue_ratio > 0.03 or red_ratio > 0.03:
         color = (255, 0, 255)  # 青赤チーム（バルセロナなど）
