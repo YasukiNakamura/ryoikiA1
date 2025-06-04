@@ -45,6 +45,8 @@ for i, box in enumerate(boxes):
     red_ratio = cv2.countNonZero(red_mask) / area
 
     # 判定と描画
+    if green_ratio > 0.15:
+        continue
     if yellow_ratio > 0.2:
         color = (0, 255, 255)  # 黄色チーム（ドルトムント）
     elif blue_ratio > 0.03 or red_ratio > 0.03:
