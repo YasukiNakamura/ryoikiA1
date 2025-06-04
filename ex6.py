@@ -1,0 +1,60 @@
+import cv2
+import numpy as np
+from ultralytics import YOLO
+import torch
+
+# モデルの読み込み
+model = YOLO("yolov8x.pt")
+
+# 画像読み込みと物体検出
+results = model.predict("ex3.jpg", conf=0.3)
+img = results[0].orig_img
+boxes = results[0].boxes
+names = model.names
+class_ids = boxes.cls.cpu().numpy()
+
+# 見やすさのためリサイズ
+scale = 900 / img.shape[1]
+img = cv2.resize(img, (900, int(img.shape[0] * scale)))
+
+# チーム判定と描画
+for i, box in enumerate(boxes):
+    if names[int(class_ids[i])] != "person":
+        continue
+
+    x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
+    x1, y1, x2, y2 = [int(v * scale) for v in (x1, y1, x2, y2)]
+    roi = img[y1:y2, x1:x2]
+    if roi.size == 0:
+        continue
+
+    hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
+
+    # 色ごとのマスク作成
+    yellow_mask = cv2.inRange(hsv, (20, 80, 50), (40, 255, 255))
+    blue_mask = cv2.inRange(hsv, (100, 100, 20), (150, 255, 150))
+    red_mask1 = cv2.inRange(hsv, (0, 100, 40), (10, 255, 255))
+    red_mask2 = cv2.inRange(hsv, (160, 100, 40), (180, 255, 255))
+    red_mask = cv2.bitwise_or(red_mask1, red_mask2)
+    green_mask = cv2.inRange(hsv, (40, 40, 40), (80, 255, 255))
+    green_ratio = cv2.countNonZero(green_mask) / area
+    # 色の割合
+    area = roi.shape[0] * roi.shape[1]
+    yellow_ratio = cv2.countNonZero(yellow_mask) / area
+    blue_ratio = cv2.countNonZero(blue_mask) / area
+    red_ratio = cv2.countNonZero(red_mask) / area
+
+    # 判定と描画
+    if yellow_ratio > 0.2:
+        color = (0, 255, 255)  # 黄色チーム（ドルトムント）
+    elif blue_ratio > 0.03 or red_ratio > 0.03:
+        color = (255, 0, 255)  # 青赤チーム（バルセロナなど）
+    else:
+        continue  # GKや審判などは除外
+
+    cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
+
+# 表示
+cv2.imshow("Team Players", img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
