@@ -9,6 +9,7 @@ model_path = "othello.pt"
 # モデル読み込み
 model = YOLO(model_path)
 
+
 # 推論
 results = model(image_path)
 
