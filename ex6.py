@@ -7,7 +7,7 @@ import torch
 model = YOLO("yolov8x.pt")
 
 # 画像読み込みと物体検出
-results = model.predict("ex3.jpg", conf=0.3)
+results = model.predict("ex3.jpg", conf=0.2)
 img = results[0].orig_img
 boxes = results[0].boxes
 names = model.names
@@ -24,7 +24,21 @@ for i, box in enumerate(boxes):
 
     x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
     x1, y1, x2, y2 = [int(v * scale) for v in (x1, y1, x2, y2)]
-    roi = img[y1:y2, x1:x2]
+    # 上半身だけ切り出す（中央30〜50％の高さ）
+    person_h = y2 - y1
+    person_w = x2 - x1
+
+    # 胸あたりの縦領域（例：上から30〜60%）
+    roi_y1 = y1 + int(person_h * 0.3)
+    roi_y2 = y1 + int(person_h * 0.5)
+
+    # 幅は中央寄せにする（任意）
+    roi_x1 = x1 + int(person_w * 0.2)
+    roi_x2 = x2 - int(person_w * 0.2)
+
+    # 領域切り出し（ユニフォーム色判定用）
+    roi = img[roi_y1:roi_y2, roi_x1:roi_x2]
+   
     if roi.size == 0:
         continue
 
@@ -42,7 +56,7 @@ for i, box in enumerate(boxes):
     red_ratio = cv2.countNonZero(red_mask) / area
 
     # 判定と描画
-    if yellow_ratio > 0.25:
+    if yellow_ratio > 0.27:
         color = (0, 255, 255)  # 黄色チーム（ドルトムント）
     elif blue_ratio > 0.03 or red_ratio > 0.03:
         color = (255, 0, 255)  # 青赤チーム（バルセロナなど）
