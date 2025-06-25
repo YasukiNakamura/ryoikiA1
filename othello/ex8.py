@@ -1,6 +1,7 @@
 from ultralytics import YOLO
 import cv2
 
+
 # モデル読み込み
 model = YOLO('best.pt')
 
